@@ -9,7 +9,7 @@ function loadImage(e) {
     const file = e.target.files[0]
 
     if (!isFileImage(file)) {
-        console.log('please select an image')
+        alertError('Please select an image')
         return
     }
 
@@ -28,6 +28,34 @@ function loadImage(e) {
 
 }
 
+function sendImage(e) {
+    e.preventDefault()
+
+    const width = widthInput.value
+    const height = heightInput.value
+    const imgPath = img.files[0].path
+
+    if (!img.files[0]) {
+        alertError('Please upload an image')
+        console.log('please select an image')
+        return
+    }
+
+    if (width === '' || height === '') {
+        alertError('Please fill in a height and width')
+        return
+    }
+    ipcRenderer.send('image:resize', {
+        imgPath, width, height
+    })
+
+}
+
+
+ipcRenderer.on('image:done', () => {
+    alertSuccess(`Image resize to ${widthInput.value} x ${heightInput.value}`)
+})
+
 
 function isFileImage(file) {
     const acceptedImageTypes = ['image/gif', 'image/png', 'image/jpg']
@@ -36,4 +64,35 @@ function isFileImage(file) {
 
 }
 
+function alertError(message) {
+    Toastify.toast({
+        text: message,
+        duration: 5000,
+        close: false,
+        style: {
+            background: 'red',
+            color: 'white',
+            textAlign: 'center'
+        }
+    })
+
+}
+function alertSuccess(message) {
+    Toastify.toast({
+        text: message,
+        duration: 5000,
+        close: false,
+        style: {
+            background: 'green',
+            color: 'white',
+            textAlign: 'center'
+        }
+    })
+}
 img.addEventListener('change', loadImage)
+
+form.addEventListener('submit', sendImage)
+
+
+
+
